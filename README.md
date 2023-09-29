@@ -181,3 +181,51 @@ Response
 ```json
 [<recipe>, <recipe>, <recipe>]
 ```
+
+
+### Run the RecipeBook Application
+1. For downloading and running the code, you should have the following installed on your system:
+   * Python 3.8 and above
+   * Git or Gitbash
+   * pip
+2. Checkout code from repository : ```git clone https://github.com/choudhury-abhishek29/ReciepeBook.git```
+3. This will create a directory `ReciepeBook`.
+4. Go inside the directory `ReciepeBook` and checkout the `master` branch.
+    ```
+   cd ReciepeBook
+   git checkout master
+   ```
+5. Once you see the files in the directory, run the following command
+    ```pip install -r requirements.txt```
+    
+    This will install all the libraries required to run this project.
+6. Once the installation completes, run the following commands to export the Flask application
+   ```
+   cd ..
+   export FLASK_APP=ReciepeBook
+   ```
+7. Run the application
+   ```
+   flask run
+   ```
+   If there are no errors, the application should run successfully and show the following message:
+   ```
+   * Serving Flask app 'ReciepeBook'
+   * Debug mode: off
+   WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+   * Running on http://127.0.0.1:5000
+   Press CTRL+C to quit
+   ```
+   The application runs on port 5000 by default. If you want to run the application on a specific port, please run the following command:
+   ```
+   flask run -p <port_number>
+   ```
+   
+8. To verify the application is running, go to the following URL from a browser or Postman
+   ```
+   http://127.0.0.1:5000
+   ```
+   You should see the following response:
+   ```
+   Welcome to your Recipe Book
+   ```
