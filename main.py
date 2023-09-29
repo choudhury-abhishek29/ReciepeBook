@@ -10,7 +10,7 @@ recipe_schema = RecipeSchema(many=True)
 
 @main.route('/')
 def index():
-    return render_template('index.html')
+    return "Welcome to your Recipe Book", 200
 
 
 @main.route('/profile', methods=['GET'])
