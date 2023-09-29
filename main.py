@@ -31,9 +31,9 @@ def get_search_recipe():
 @main.route('/recipe', methods=['POST'])
 def post_recipe():
     if isValidateRequest(request.authorization.username, request.authorization.password):
-        json = request.json
-        isValidRecipe = validateRecipe(json)
+        isValidRecipe = validateRecipe(request)
         if isValidRecipe['result']:
+            json = request.json
             recipename = json['recipename']
             ingredients = json['ingredients']
             instructions = json['instructions']
@@ -59,36 +59,34 @@ def post_recipe():
 
 @main.route('/update/<id>', methods=['PUT'])
 def put_update_recipe(id):
-    if (isValidateRequest(request.authorization.username, request.authorization.password) and isValidateUpdateId(id)):
+    if isValidateRequest(request.authorization.username, request.authorization.password) and isValidateUpdateId(id):
         recipe = Recipe.query.filter_by(id=id, username=request.authorization.username).first()
         if recipe:
-            req_json = request.json
-            for arg in req_json:
-                if arg == 'ingredients':
-                    recp_ing = eval(recipe.ingredients)
-                    req_ing = req_json[arg]     # TODO : Validate update body
-                    for ing in req_ing:
-                        if ing == 'remove':
-                            for item in req_ing['remove']:
-                                if item in recp_ing:
-                                    recp_ing.pop(item)
-                                else:
-                                    return 'Item not found to remove : '+item, 404
+            isValidUpdateReq = validateRecipe(request)
+            if isValidUpdateReq['result']:
+                req_json = request.json
+                for arg in req_json:
+                    if arg == 'ingredients':
+                        recp_ing = eval(recipe.ingredients)
+                        req_ing = req_json[arg]
+                        result = updateIngredients(recp_ing, req_ing)
+                        if result['result']:
+                            recipe.ingredients = result['message']
                         else:
-                            recp_ing[ing] = req_ing[ing]
-                    recipe.ingredients = str(recp_ing)
+                            return result['message'], 404
+                    elif arg == 'category':
+                        recipe.category = req_json[arg]
 
-                elif arg == 'category':
-                    recipe.category = req_json[arg]
+                    elif arg == 'notes':
+                        recipe.notes = req_json[arg]
 
-                elif arg == 'notes':
-                    recipe.notes = req_json[arg]
+                    elif arg == 'recipename':
+                        recipe.recipename = req_json[arg]
 
-                elif arg == 'recipename':
-                    recipe.recipename = req_json[arg]
-
-                elif arg == 'servingsize':
-                    recipe.servingsize = req_json[arg]
+                    elif arg == 'servingsize':
+                        recipe.servingsize = req_json[arg]
+            else:
+                return isValidUpdateReq['message'], 400
 
             recipe.datemodified = datetime.utcnow()
             db.session.commit()
@@ -112,30 +110,51 @@ def delete_delete_recipe(id):
     else:
         return 'Invalid id : ' + id, 400
 
-def validateRecipe(recipe):
-    mandatory_fields = ['category', 'ingredients', 'instructions', 'recipename', 'servingsize']
-    for field in mandatory_fields:
-        if field not in recipe:
-            return {'result': False, 'message': field+' is a mandatory field'}
+def updateIngredients(recp_ing, req_ing):
+    for ing in req_ing:
+        if ing == 'remove':
+            for item in req_ing['remove']:
+                if item in recp_ing:
+                    recp_ing.pop(item)
+                else:
+                    return {'result': False, 'message': 'Item not found to remove : ' + item}
+        else:
+            recp_ing[ing] = req_ing[ing]
+    return {'result': True, 'message': str(recp_ing)}
 
+def validateRecipe(request):
+    method = request.method
+    recipe = request.json
+    if method == 'POST':
+        mandatory_fields = ['category', 'ingredients', 'instructions', 'recipename', 'servingsize']
+        for field in mandatory_fields:
+            if field not in recipe:
+                return {'result': False, 'message': field+' is a mandatory field'}
+
+    return validateRecipeBody(recipe)
+
+
+def validateRecipeBody(recipe):
     units = ['count', 'gm', 'ml', 'l', 'inch', 'tsp', 'tbsp']
-    recipe_category = ['breakfast','lunch','dinner']
+    recipe_category = ['breakfast', 'lunch', 'dinner']
 
     for entry in recipe:
         if entry == 'category':
             if recipe['category'] not in recipe_category:
-                return {'result': False, 'message': 'Invalid recipe category : '+recipe['category']}
+                return {'result': False, 'message': 'Invalid recipe category : ' + recipe['category']}
         if entry == 'ingredients':
             for ing in recipe['ingredients']:
-                if not isinstance(recipe['ingredients'][ing]['quantity'], (int, float)):
-                    return {'result': False, 'message': 'Quantity for ingredient ' + ing+' should be numeric'}
-                if recipe['ingredients'][ing]['unit'] not in units:
-                    return {'result': False, 'message': 'Invalid unit '+recipe['ingredients'][ing]['unit']+' for ingredient '+ing}
+                if ing != 'remove':
+                    if not isinstance(recipe['ingredients'][ing]['quantity'], (int, float)):
+                        return {'result': False, 'message': 'Quantity for ingredient ' + ing + ' should be numeric'}
+                    if recipe['ingredients'][ing]['unit'] not in units:
+                        return {'result': False,
+                            'message': 'Invalid unit ' + recipe['ingredients'][ing]['unit'] + ' for ingredient ' + ing}
         if entry == 'instructions':
             if recipe['instructions'] == '':
                 return {'result': False, 'message': 'Instructions can not be empty'}
         if entry == 'notes':
-            if len(recipe['notes'])>100:
+            if len(recipe['notes']) > 100:
                 return {'result': False, 'message': 'Notes can not be longer than 100 characters'}
         if entry == 'recipename':
             if recipe['recipename'] == '':
@@ -143,7 +162,6 @@ def validateRecipe(recipe):
         if entry == 'servingsize':
             if recipe['servingsize'] == '':
                 return {'result': False, 'message': 'Servingsize can not be empty'}
-
 
     return {'result': True}
 
@@ -157,7 +175,6 @@ def isValidateUpdateId(id):
 
 def getSearchQuery(request):
     args = request.args
-
     query = db.session.query(Recipe).filter(Recipe.username == request.authorization.username)
     for arg in args.to_dict():
         if arg == 'recipename':
