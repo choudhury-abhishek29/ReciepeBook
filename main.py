@@ -24,8 +24,12 @@ def get_profile():
 
 @main.route('/search/recipe', methods=['GET'])
 def get_search_recipe():
-    recipes = getSearchQuery(request).all()
-    return recipe_schema.dump(recipes), 200
+    query = getSearchQuery(request)
+    if query['result']:
+        recipes = query.all()
+        return recipe_schema.dump(recipes), 200
+    else:
+        return query['message'], 400
 
 
 @main.route('/recipe', methods=['POST'])
@@ -149,7 +153,7 @@ def validateRecipeBody(recipe):
                         return {'result': False, 'message': 'Quantity for ingredient ' + ing + ' should be numeric'}
                     if recipe['ingredients'][ing]['unit'] not in units:
                         return {'result': False,
-                            'message': 'Invalid unit ' + recipe['ingredients'][ing]['unit'] + ' for ingredient ' + ing}
+                            'message': 'Invalid unit ' + recipe['ingredients'][ing]['unit'] + ' for ingredient ' + ing+'. Please use any of these units : '+str(units)}
         if entry == 'instructions':
             if recipe['instructions'] == '':
                 return {'result': False, 'message': 'Instructions can not be empty'}
@@ -185,5 +189,7 @@ def getSearchQuery(request):
             query = query.filter(Recipe.category == args['category'])
         elif arg == 'servingsize':
             query = query.filter(Recipe.servingsize == args['servingsize'])
+        else:
+            return {'result': False, 'message': 'Invalid search parameter: ' + arg+'. Please use any of these params : category, recipename, servingsize or id.'}
 
-    return query
+    return {'result': True, 'message': query}
