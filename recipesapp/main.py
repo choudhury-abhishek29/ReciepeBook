@@ -26,7 +26,7 @@ def get_profile():
 def get_search_recipe():
     query = getSearchQuery(request)
     if query['result']:
-        recipes = query.all()
+        recipes = query['message'].all()
         return recipe_schema.dump(recipes), 200
     else:
         return query['message'], 400
