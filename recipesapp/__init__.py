@@ -11,7 +11,7 @@ ma = Marshmallow()
 def create_app():
     app = Flask(__name__)
     basedir = os.path.abspath(os.path.dirname(__file__))
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'recipes.db')
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, '../recipes.db')
     app.config['SECRET_KEY'] = 'secret-key'
 
     from .main import main as main_blueprint
