@@ -182,6 +182,16 @@ Response
 [<recipe>, <recipe>, <recipe>]
 ```
 
+### Access the RecipeBook Application
+The application is hosted on the following link.
+```
+https://my-web-recipe-book-f6cd3f5d8790.herokuapp.com/
+```
+On opening the link on a browser, it should show the following:
+```Welcome to your Recipe Book```
+
+For rest of the requests, please use Postman.
+
 
 ### Run the RecipeBook Application
 1. For downloading and running the code, you should have the following installed on your system:
