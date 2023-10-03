@@ -1,6 +1,6 @@
 from flask import Blueprint, request
 from werkzeug.security import generate_password_hash, check_password_hash
-from .models import User
+from .models import User, UserSchema
 from . import db
 
 auth = Blueprint('auth', __name__)
@@ -32,6 +32,14 @@ def post_signup():
             return "Bad Request", 400
 
     return "signup success : " + username, 200
+
+@auth.route('/users', methods=['GET'])
+def getUsers():
+    if isValidateRequest(request.authorization.username, request.authorization.password):
+        users = User.query.all()
+        return UserSchema.dump(users), 200
+    else:
+        return 'Unauthorized', 401
 
 def isValidateRequest(username, password):
     user = User.query.filter_by(username=username).first()
