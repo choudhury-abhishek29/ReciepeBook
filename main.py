@@ -3,6 +3,7 @@ from .auth import isValidateRequest
 from .models import Recipe, RecipeSchema
 from datetime import datetime
 from . import db
+import ast
 
 main = Blueprint('main', __name__)
 recipe_schema = RecipeSchema(many=True)
@@ -17,7 +18,7 @@ def index():
 def get_profile():
     if isValidateRequest(request.authorization.username, request.authorization.password):
         recipes = Recipe.query.filter_by(username=request.authorization.username).all()
-        return recipe_schema.dump(recipes), 200
+        return recipe_schema.dump(formatRecipeResponse(recipes)), 200
     else:
         return 'Unauthorized', 401
 
@@ -27,7 +28,8 @@ def get_search_recipe():
     query = getSearchQuery(request)
     if query['result']:
         recipes = query['message'].all()
-        return recipe_schema.dump(recipes), 200
+
+        return recipe_schema.dump(formatRecipeResponse(recipes)), 200
     else:
         return query['message'], 400
 
@@ -137,6 +139,12 @@ def validateRecipe(request):
 
     return validateRecipeBody(recipe)
 
+
+def formatRecipeResponse(recipes):
+    for recipe in recipes:
+        ing_json = ast.literal_eval(recipe.ingredients)
+        recipe.ingredients = ing_json
+    return recipes
 
 def validateRecipeBody(recipe):
     units = ['count', 'gm', 'ml', 'l', 'inch', 'tsp', 'tbsp']
