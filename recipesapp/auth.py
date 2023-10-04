@@ -4,7 +4,7 @@ from .models import User, UserSchema
 from . import db
 
 auth = Blueprint('auth', __name__)
-
+user_schema = UserSchema(many=True)
 
 @auth.route('/signup', methods=['POST'])
 def post_signup():
@@ -37,7 +37,7 @@ def post_signup():
 def getUsers():
     if isValidateRequest(request.authorization.username, request.authorization.password):
         users = User.query.all()
-        return UserSchema.dump(users), 200
+        return user_schema.dump(users), 200
     else:
         return 'Unauthorized', 401
 
