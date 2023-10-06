@@ -172,6 +172,9 @@ Following parameters can be used for searching a recipe :
 /search/recipe?recipename=pizza
 /search/recipe?servingsize=2
 /search/recipe?id=8
+/search/recipe?before=2023-10-05
+/search/recipe?after=2023-10-05
+/search/recipe?between=2023-09-27,2023-10-05
 ```
 Authorization
 ```json
