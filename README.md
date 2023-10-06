@@ -172,6 +172,9 @@ Following parameters can be used for searching a recipe :
 /search/recipe?recipename=pizza
 /search/recipe?servingsize=2
 /search/recipe?id=8
+/search/recipe?before=2023-10-05
+/search/recipe?after=2023-10-05
+/search/recipe?between=2023-09-27,2023-10-05
 ```
 Authorization
 ```json
@@ -181,6 +184,16 @@ Response
 ```json
 [<recipe>, <recipe>, <recipe>]
 ```
+
+### Access the RecipeBook Application
+The application is hosted on the following link.
+```
+https://my-web-recipe-book-f6cd3f5d8790.herokuapp.com/
+```
+On opening the link on a browser, it should show the following:
+```Welcome to your Recipe Book```
+
+For rest of the requests, please use Postman.
 
 
 ### Run the RecipeBook Application

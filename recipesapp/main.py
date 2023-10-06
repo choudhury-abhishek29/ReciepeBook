@@ -189,6 +189,17 @@ def getSearchQuery(request):
             query = query.filter(Recipe.category == args['category'])
         elif arg == 'servingsize':
             query = query.filter(Recipe.servingsize == args['servingsize'])
+        elif arg == 'before':
+            search_date = datetime.strptime(args['before'], "%Y-%m-%d")
+            query = query.filter(Recipe.dateposted < search_date)
+        elif arg == 'after':
+            search_date = datetime.strptime(args['after'], "%Y-%m-%d")
+            query = query.filter(Recipe.dateposted > search_date)
+        elif arg == 'between':
+            search_dates = args['between']
+            from_date = datetime.strptime(search_dates.split(',')[0], "%Y-%m-%d")
+            to_date = datetime.strptime(search_dates.split(',')[1], "%Y-%m-%d")
+            query = query.filter(Recipe.dateposted.between(from_date, to_date))
         else:
             return {'result': False, 'message': 'Invalid search parameter: ' + arg+'. Please use any of these params : category, recipename, servingsize or id.'}
 
